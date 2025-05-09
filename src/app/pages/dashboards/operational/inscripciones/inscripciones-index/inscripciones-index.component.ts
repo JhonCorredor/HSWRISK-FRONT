@@ -244,9 +244,14 @@ export class InscripcionesIndexComponent implements OnInit {
                                        </div>`;
                         } else if (row.estado == "CERTIFICADO") {
                             content = `<button class="btn btn-sm text-secondary btn-download" type="button" data-id="${id}"><i class="fa-duotone fa-file-arrow-down"></i> Descargar Certificado</button>
-                                        <button class="btn btn-sm text-secondary btn-view" type="button" data-id="${id}"><i class="fa-duotone fa-eye"></i> Ver Certificado</button>`;
+                                        <button class="btn btn-sm text-secondary btn-view" type="button" data-id="${id}"><i class="fa-duotone fa-eye"></i> Ver Certificado</button>`
+                                        ;
                         }
-
+                        if(rol == 'ADMIN' && row.estado == "CERTIFICADO"){
+                            content += `<button class="btn btn-sm text-danger check-cancel" type="button" data-id="${id}"><i class="fa-duotone fa-solid fa-trash"></i> Anular Certificado</button>`;
+                        }
+ 
+  
                         if (rol == "INSTRUCTOR") {
                             content = `<div role="group" class="button-group" aria-label="Basic example">
                                         <div class="d-flex justify-content-center">
@@ -305,6 +310,12 @@ export class InscripcionesIndexComponent implements OnInit {
                     .on('change', (event: any) => {
                         this.updateEstado(event.currentTarget.dataset.id, "CERTIFICADO");
                     });
+                $('.check-cancel')
+                .off()
+                .on('click', (event: any) => {
+                    this.cancelCertificate(event.currentTarget.dataset.id, "APROBADO");
+                });    
+
                 $('.btn-download')
                     .off()
                     .on('click', (event: any) => {
@@ -405,6 +416,67 @@ export class InscripcionesIndexComponent implements OnInit {
         });
     
     }
+    // Method to cancel certificate to apprentices
+    //start
+    cancelCertificate(id: any, estado: string){
+        Swal.fire({
+            title: `¿Está seguro de anular el certificado de este estudiante?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#F8E12E',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, Actualizar!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.helperService.showLoading();
+                this.service.getById("Inscripcion", id).subscribe((res: any) => {
+                    this.service.getByCode('Estado', estado).subscribe((j) => {
+                        var inscripcion = {
+                            Id: res.data.id,
+                            Activo: res.data.activo,
+                            CreateAt: res.data.createAt,
+                            Codigo: res.data.codigo,
+                            PagoValidado: true,
+                            ClienteId: res.data.clienteId,
+                            EstadoId: j.data.id,
+                            CursoDetalleId: res.data.cursoDetalleId,
+                            UsuarioRegistro: res.data.usuarioRegistro,
+                        }
+
+                        this.service.save("Inscripcion", id, inscripcion).subscribe(
+                            (response) => {
+                                if (response.status) {
+                                    this.helperService.showMessage(
+                                        MessageType.SUCCESS,
+                                        Messages.UPDATESUCCESS
+                                    );
+                                    
+                                    var rol = localStorage.getItem("rol");
+                                    if (rol == "ADMIN") {
+                                        this.cargarListaAdmin();
+                                    }
+                                    this.helperService.hideLoading();
+                                } else {
+                                    this.helperService.hideLoading();
+                                }
+                            },
+                            (error) => {
+                                this.helperService.hideLoading();
+                                this.helperService.showMessage(
+                                    MessageType.WARNING,
+                                    error
+                                );
+                            }
+                        );
+                    });
+                });
+            } else {
+                $(".form-check-input").prop("checked", false);
+            }
+        });
+    }
+    //end
 
     validarPagoAll() {
         Swal.fire({
@@ -809,6 +881,7 @@ export class InscripcionesIndexComponent implements OnInit {
         });
     }
     cargarListaAdmin() {
+        
         var data = new DatatableParameter(); data.pageNumber = ''; data.pageSize = ''; data.filter = ''; data.columnOrder = ''; data.directionOrder = '';
 
         this.service.datatable('Inscripcion', data).subscribe((res) => {

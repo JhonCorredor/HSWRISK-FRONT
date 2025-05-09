@@ -80,6 +80,13 @@
       <br>
       <div class="row">
         <div class="col-sm-3 col-md-3 col-lg-3">
+            <label>Tipo Documento</label>
+            <ng-select [items]="ListTipoIdentificacion" bindLabel="textoMostrar" bindValue="id"
+                formControlName="TipoDocumentoRepresentante"> </ng-select>
+            <app-forms-messages [error]="frmEmpresas.get('TipoDocumentoRepresentante')"
+                [statusForm]=statusForm></app-forms-messages>
+        </div>
+        <div class="col-sm-3 col-md-3 col-lg-3">
           <label>N° Indentificación</label>
           <input type="text" class="form-control" formControlName="NumeroIndentificacion" />
           <app-forms-messages [error]="frmEmpresas.get('NumeroIndentificacion')" [statusForm]="statusForm"

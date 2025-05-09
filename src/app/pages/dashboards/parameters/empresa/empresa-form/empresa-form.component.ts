@@ -28,6 +28,7 @@ export class EmpresaFormComponent implements OnInit {
   listCiudades = signal<DataSelectDto[]>([]);
   listConvenios = signal<DataSelectDto[]>([]);
   ListEnfasisSectorial: any[] = [];
+  public ListTipoIdentificacion: any[] = [];
   visibleInput = false;
 
   breadcrumb = [
@@ -75,6 +76,8 @@ export class EmpresaFormComponent implements OnInit {
       //add new atributes
       NombreRepresentante: new FormControl(null, Validators.required),
       NumeroIndentificacion: new FormControl(null, Validators.required),
+      TipoDocumentoRepresentante: new FormControl(null, Validators.required),
+      
     });
     this.routerActive.params.subscribe((l) => (this.id = l['id']));
   }
@@ -83,6 +86,14 @@ export class EmpresaFormComponent implements OnInit {
     this.cargarCiudades();
     this.cargarConvenios();
     this.CargarEnum('ListEnfasisSectorial');
+     this.ListTipoIdentificacion = [
+      { id: 'CC', textoMostrar: 'Cedula de Ciudadania' },
+      { id: 'CE', textoMostrar: 'Cedula Extranjeria' },
+      { id: 'PPT', textoMostrar: 'Permiso Protección Temporal' },
+      { id: 'PE', textoMostrar: 'Permiso Especial Permanencia' },
+      { id: 'PP', textoMostrar: 'Pasaporte' },
+
+   ];
 
 
     if (this.id != undefined && this.id != null) {
@@ -106,7 +117,8 @@ export class EmpresaFormComponent implements OnInit {
         this.frmEmpresas.controls['NombreDelAdministradorContraCaídas'].setValue(l.data.nombreDelAdministradorContraCaídas);
         // this.frmEmpresas.controls['EnfasisDecapacitacion'].setValue(l.data.enfasisDecapacitacion);
         this.frmEmpresas.controls['ContraCaídas'].setValue(l.data.contraCaídas);
-        
+        this.frmEmpresas.controls['TipoDocumentoRepresentante'].setValue(l.data.tipoDocumentoRepresentante);
+
         if (l.data.contraCaídas) {
           this.visibleInput = true;
           this.ModificData(true);

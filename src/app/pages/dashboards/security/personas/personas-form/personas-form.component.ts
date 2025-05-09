@@ -83,7 +83,7 @@ export class PersonasFormComponent implements OnInit {
       { id: 'CE', textoMostrar: 'Cedula Extranjeria' },
       { id: 'PPT', textoMostrar: 'Permiso Protección Temporal' },
       { id: 'PE', textoMostrar: 'Permiso Especial Permanencia' },
-      
+      { id: 'PP', textoMostrar: 'Pasaporte' },      
    ];
 
     this.cargarListaForeingKey();
