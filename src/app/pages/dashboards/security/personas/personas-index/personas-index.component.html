@@ -6,44 +6,10 @@
             <app-botones #botonesSuperior [botones]="botones" [dropdown]="false" (eventNew)="nuevo()"></app-botones>
         </div>
     </div>
-    <div class="card-body" style="padding: 40px;">
-        <div class="table-responsive table-card">
-            <table id="datatable" class="table table-bordered table-hover table-striped w-100">
-                <thead>
-                    <tr>
-                        <th class="text-center">TIPO DOCUMENTO</th>
-                        <th class="text-center">DOCUMENTO</th>
-                        <th class="text-center">NOMBRE COMPLETO</th>
-                        <th class="text-center">DIRECCIÓN</th>
-                        <th class="text-center">TELÉFONO</th>
-                        <th class="text-center">EMAIL</th>
-                        <th class="text-center">GENERO</th>
-                        <th class="text-center">FECHA DE NACIMIENTO</th>
-                        <th class="text-center">PAIS DE NACIMIENTO</th>
-                        <th class="text-center">ESTADO</th>
-                        <th class="text-center">ACCIONES</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="text-center" *ngFor="let item of listPersonas(); index as i">
-                        <td>{{ item.tipoDocumento }}</td>
-                        <td>{{ item.documento }}</td>
-                        <td>{{ item.primerNombre }} {{ item.segundoNombre }} {{ item.primerApellido }} {{ item.segundoApellido }}</td>
-                        <td>{{ item.direccion }}</td>
-                        <td>{{ item.telefono }}</td>
-                        <td>{{ item.email }}</td>
-                        <td>{{ item.genero }}</td>
-                        <td>{{ item.dateBirth | date: 'dd/MM/yyyy' }}</td>
-                        <td>{{ item.countryBirth }}</td>
-                        <td *ngIf="item.activo; else elseBlock"><label class='text-center text-success'>Activo</label></td>
-                        <ng-template #elseBlock><td><label class='text-center text-danger'>Inactivo</label></td></ng-template>
-                        <td>
-                            <button class="btn btn-sm text-secondary" type="button" (click)="updateGeneric(item.id)"><i class="fa-duotone fa-pen-to-square"></i> Editar</button>
-                            <button class="btn btn-sm text-secondary" type="button" (click)="deleteGeneric(item.id)"><i class="fa-duotone fa-trash-can"></i> Eliminar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+     <div class="card-body" style="padding: 40px;">
+    <div class="table-responsive table-card">
+      <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
+        class="table table-bordered table-hover table-striped w-100"></table>
     </div>
+  </div>
 </div>
