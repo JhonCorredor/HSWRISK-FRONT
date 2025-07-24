@@ -1,4 +1,4 @@
-import { Component, OnInit, NgModule, signal } from '@angular/core';
+import { Component, OnInit, NgModule, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GeneralModule } from 'src/app/general/general.module';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -8,6 +8,8 @@ import { GeneralParameterService } from '../../../../../generic/general.service'
 import { DatatableParameter } from '../../../../../admin/datatable.parameters';
 import { Usuario } from '../usuarios.module';
 import { LANGUAGE_DATATABLE } from 'src/app/admin/datatable.language';
+import { DataTableDirective } from 'angular-datatables';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-usuarios-index',
@@ -22,6 +24,14 @@ export class UsuariosIndexComponent implements OnInit {
   botones: String[] = ['btn-nuevo'];
   listUsuarios = signal<Usuario[]>([]);
 
+
+
+  
+  public dtTrigger: Subject<any> = new Subject();
+    @ViewChild(DataTableDirective) dtElement!: DataTableDirective;
+    dtOptions: DataTables.Settings = {};
+  
+
   constructor(
     private service: GeneralParameterService,
     private modalService: NgbModal,
@@ -34,51 +44,105 @@ export class UsuariosIndexComponent implements OnInit {
     this.cargarLista();
   }
 
-  cargarLista() {
-    this.getData()
-      .then((datos) => {
-        datos.data.forEach((item: any) => {
-          this.listUsuarios.update(listUsuarios => {
-            const Usuario: Usuario = {
-              id: item.id,
-              activo: item.activo,
-              userName: item.userName,
-              password: item.password,
-              personaId: item.personaId,
-              persona: item.persona,
-            };
 
-            return [...listUsuarios, Usuario];
+    cargarLista() {
+      this.dtOptions = {
+        dom: 'Blfrtip',
+        processing: true,
+        ordering: true,
+        responsive: true,
+        paging: true,
+        order: [0, 'desc'],
+        language: LANGUAGE_DATATABLE,
+        ajax: (dataTablesParameters: any, callback: any) => {
+          var data = new DatatableParameter();
+          data.pageNumber = '';
+          data.pageSize = '';
+          data.filter = '';
+          data.columnOrder = '';
+          data.directionOrder = '';
+          this.service.datatable('Usuario', data).subscribe((res) => {
+            callback({
+              recordsTotal: res.data.length,
+              recordsFiltered: res.data.length,
+              draw: dataTablesParameters.draw,
+              data: res.data,
+            });
           });
-        });
-
-        setTimeout(() => {
-          $("#datatable").DataTable({
-            dom: 'Blfrtip',
-            destroy: true,
-            language: LANGUAGE_DATATABLE,
-            processing: true
-          });
-        }, 200);
-      })
-      .catch((error) => {
-        console.error('Error al obtener los datos:', error);
-      });
-  }
-
-  getData(): Promise<any> {
-    var data = new DatatableParameter(); data.pageNumber = ""; data.pageSize = ""; data.filter = ""; data.columnOrder = ""; data.directionOrder = "";
-    return new Promise((resolve, reject) => {
-      this.service.datatable("Usuario", data).subscribe(
-        (datos) => {
-          resolve(datos);
         },
-        (error) => {
-          reject(error);
-        }
-      )
-    });
-  }
+        columns: [
+          {
+            title: 'USUARIO',
+            data: 'userName',
+            className: 'text-center',
+          },
+          {
+            title: 'PERSONA',
+            data: 'persona',
+            className: 'text-center',
+          },
+
+          {
+            title: 'ESTADO',
+            data: 'activo',
+            className: 'text-center',
+            render: function (item: any) {
+              if (item) {
+                return "<label class='text-center text-success'>Activo</label>";
+              } else {
+                return "<label class='text-center text-danger'>Inactivo</label>";
+              }
+            },
+          },
+          {
+            title: 'ACCIONES',
+            orderable: false,
+            data: 'id',
+            className: 'text-center',
+            render: function (id: any) {
+              return `<div role="group"  class="button-group " aria-label="Basic example">
+                            <button type="button" title="Editar" class="btn btn-sm text-secondary btn-dropdown-modificar" data-id="${id}"><i class="fa-duotone fa-pen-to-square" data-id="${id}"></i> Editar</button>
+                            <button type="button" title="Eliminar" class="btn btn-sm text-secondary btn-dropdown-eliminar" data-id="${id}"><i class="fa-duotone fa-trash-can" data-id="${id}"></i> Eliminar</button>
+
+                           <button type="button" title="Eliminar" class="btn btn-sm text-secondary btn-dropdown-change-password" data-id="${id}">
+                           <i class="fa-duotone fa-lock-keyhole" data-id="${id}"></i>
+                             Cambiar Contraseña</button>
+
+                          </div>`;
+            },
+          },
+        ],
+        drawCallback: () => {
+          $('.btn-dropdown-modificar')
+            .off()
+            .on('click', (event: any) => {
+              this.update(event.currentTarget.dataset.id);
+            });
+
+          $('.btn-dropdown-eliminar')
+            .off()
+            .on('click', (event: any) => {
+              this.deleteGeneric(event.currentTarget.dataset.id);
+            });
+           $('.btn-dropdown-change-password')
+            .off()
+            .on('click', (event: any) => {
+              this.changePassword(event.currentTarget.dataset.id);
+            });  
+        },
+      };
+    }
+
+
+        ngAfterViewInit() {
+      this.dtTrigger.next(this.dtOptions);
+    }
+
+    ngOnDestroy(): void {
+      this.dtTrigger.unsubscribe();
+    }
+
+  
 
   refrescarTabla() {
     $("#datatable").DataTable().destroy();
