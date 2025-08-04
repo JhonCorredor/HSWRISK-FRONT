@@ -111,6 +111,18 @@ export class PersonasIndexComponent implements OnInit {
             title: 'FECHA DE NACIMIENTO',
             data: 'dateBirth',
             className: 'text-center',
+              render: function (data: string) {
+              try {
+                const date = new Date(data);
+                if (isNaN(date.getTime())) return '';
+                const year = date.getFullYear();
+                const month = ('0' + (date.getMonth() + 1)).slice(-2);
+                const day = ('0' + date.getDate()).slice(-2);
+                return `${year} / ${month} / ${day}`;
+              } catch {
+                return '';
+              }
+            }
           },
                               {
             title: 'PAIS DE NACIMIENTO',
