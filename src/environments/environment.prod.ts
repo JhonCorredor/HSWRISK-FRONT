@@ -6,3 +6,4 @@ export const environment = {
   //Production
  url: 'https://api.hswrisk.com/api/',
 };
+
